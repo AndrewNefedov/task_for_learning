@@ -6,20 +6,65 @@ package lesson2;
 
 import java.io.File;
 import java.util.*;
+import java.lang.Exception;
 
 public class Main
 {
-    public static void main (String[] args) throws Exception
-    {
-        ScanPath pathOfFile = new ScanPath(); //экземпляр для доступа к методам по выяснению пути к файлам
-        File readPath = pathOfFile.pathReader(args); //передаём массив в метод и сохраняем путь к считываемому файла
-        listWork sortList = new listWork(); //экземпляр для доступа к методам сортировки списка
-        sortList.readFile(readPath); // передаём путь к считываемму файлу и считываем файл, заполняя список
-        List sortedList = sortList.listSort(); //сортируем список и сохраняем его
-        String[] dataOnAge = sortList.listAge(); //сохраняем массив, содержащий данные о макс, мин и ср. возрасте
-        File pathSavedFile = pathOfFile.pathWriter(args); //передаём массив в метод и сохраняем путь к сохраняемому файлу
-        EntryAndOutput saveFile = new EntryAndOutput(); // экземпляр для сохранения файла и вывода на консоль
-        saveFile.writeFile(pathSavedFile,sortedList,dataOnAge); //сохраняем в файл
-        saveFile.outputData(sortedList,dataOnAge); //выводим на консоль
+    public static void main(String[] args) throws Exception {
+        String inputFileName;
+        String outputFileName;
+        if (args.length != 0){
+            OptionsScanner optionsScanner = new OptionsScanner(args);
+            inputFileName = optionsScanner.getInputFileName();
+            outputFileName = optionsScanner.getOutputFileName();
+        }
+
+        else {
+            StandartConsoleScanner standartScanner = new StandartConsoleScanner();
+            standartScanner.findInputFileName();
+            inputFileName = standartScanner.getInputFileName();
+            standartScanner.findOutputFileName();
+            outputFileName = standartScanner.getOutputFileName();
+        }
+
+        if (inputFileName.isEmpty() || outputFileName.isEmpty()){
+            throw new NotFileSpecifiedException();
+        }
+
+        File inputFile = new File(inputFileName);
+        File outputFile = new File(outputFileName);
+        if (!inputFile.exists()){
+            throw new NotFileException();
+        }
+
+        FileFormat format = new FileFormat();
+        format.findInputFileName(inputFileName);
+        String inputFileFormat = format.getInputFileFormat();
+        format.findOutputFileName(outputFileName);
+        String outputFileFormat = format.getOutputFileFormat();
+
+        ReaderRegistry readerRegistry = new ReaderRegistry();
+        Reader reader = readerRegistry.getReader(inputFileFormat);
+
+        if(reader == null){
+            throw new NotFormatReadSpecifiedException();
+        }
+
+        List<PersonInformation> personRecords = new ArrayList<>();
+        personRecords = reader.loadPersons(personRecords,inputFile);
+
+        if (!personRecords.isEmpty()){
+            WriterRegistry writerRegistry = new WriterRegistry();
+            Writer writer = writerRegistry.getWriter(outputFileFormat);
+            if (writer == null){
+                throw new NotFormatWriteSpecifiedException();
+            }
+            writer.savePersons(personRecords,outputFile);
+        }
+
+        for (PersonInformation person : personRecords){
+            System.out.print(person + "\n");
+        }
+
     }
 }
