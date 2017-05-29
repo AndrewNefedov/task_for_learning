@@ -1,70 +1,48 @@
 package lesson2;
 
-/**
- * Created by комп on 12.04.17.
- */
+import java.io.*;
+import java.util.List;
+import java.util.stream.IntStream;
 
-import java.io.File;
-import java.util.*;
-import java.lang.Exception;
+public class Main {
 
-public class Main
-{
     public static void main(String[] args) throws Exception {
-        String inputFileName;
-        String outputFileName;
-        if (args.length != 0){
-            OptionsScanner optionsScanner = new OptionsScanner(args);
-            inputFileName = optionsScanner.getInputFileName();
-            outputFileName = optionsScanner.getOutputFileName();
-        }
 
-        else {
-            StandartConsoleScanner standartScanner = new StandartConsoleScanner();
-            standartScanner.findInputFileName();
-            inputFileName = standartScanner.getInputFileName();
-            standartScanner.findOutputFileName();
-            outputFileName = standartScanner.getOutputFileName();
-        }
+        final FilePair filePair = InputDataProcessor.getFilePair(args);
 
-        if (inputFileName.isEmpty() || outputFileName.isEmpty()){
-            throw new NotFileSpecifiedException();
-        }
+        final File inputFile = FileUtils.getFile(filePair.getInputFileName());
+        final File outputFile = FileUtils.getFile(filePair.getOutputFileName(), true);
 
-        File inputFile = new File(inputFileName);
-        File outputFile = new File(outputFileName);
-        if (!inputFile.exists()){
-            throw new NotFileException();
-        }
+        if (!inputFile.canRead()) throw new WrongAccessPermissions("Can't read input file!");
+        if (!outputFile.canRead() || !outputFile.canWrite()) throw new WrongAccessPermissions("Can't read or write output file!");
 
-        FileFormat format = new FileFormat();
-        format.findInputFileName(inputFileName);
-        String inputFileFormat = format.getInputFileFormat();
-        format.findOutputFileName(outputFileName);
-        String outputFileFormat = format.getOutputFileFormat();
+        final List<PersonInformation> persons = ParserFactory.getParser(filePair.getInputFileName()).parse(inputFile);
 
-        ReaderRegistry readerRegistry = new ReaderRegistry();
-        Reader reader = readerRegistry.getReader(inputFileFormat);
+        persons.forEach(System.out::println);
 
-        if(reader == null){
-            throw new NotFormatReadSpecifiedException();
-        }
+        System.out.println(); // Just new line between data
 
-        List<PersonInformation> personRecords = new ArrayList<>();
-        personRecords = reader.loadPersons(personRecords,inputFile);
+        printStatisticForAge(persons);
 
-        if (!personRecords.isEmpty()){
-            WriterRegistry writerRegistry = new WriterRegistry();
-            Writer writer = writerRegistry.getWriter(outputFileFormat);
-            if (writer == null){
-                throw new NotFormatWriteSpecifiedException();
-            }
-            writer.savePersons(personRecords,outputFile);
-        }
+        ParserFactory.getSerializer(filePair.getOutputFileName()).serialize(persons, outputFile);
+    }
 
-        for (PersonInformation person : personRecords){
-            System.out.print(person + "\n");
-        }
+    private static void printStatisticForAge(List<PersonInformation> persons) {
 
+        final int[] ages = persons.stream().mapToInt(PersonInformation::getAge).toArray();
+        final int sum = IntStream.of(ages).sum();
+        final double average = IntStream.of(ages).average().getAsDouble();
+        final int max = IntStream.of(ages).max().orElse(-1);
+        final int min = IntStream.of(ages).min().orElse(-1);
+
+        System.out.println("Age's statistic:");
+        System.out.println("Sum: " + sum);
+        System.out.printf("Average: %.2f%n",average);
+        System.out.println("Min: " + valueOrNa(min));
+        System.out.println("Max: " + valueOrNa(max));
+    }
+
+    private static String valueOrNa(int value) {
+        return (value == -1) ? "N/A" : String.valueOf(value);
     }
 }

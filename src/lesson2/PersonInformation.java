@@ -6,6 +6,7 @@ package lesson2;
 
 class PersonInformation // класс для хранения вводимых данных о человеке
 {
+
     private String firstName; // оьъявляет атрибут "имя"
     private String lastName; // оьъявляет атрибут "фамилия"
     private Integer age; // оьъявляет атрибут "возраст"
@@ -18,6 +19,7 @@ class PersonInformation // класс для хранения вводимых �
 
     public PersonInformation(String[] mas) //метод-конструктор для задания значений полям. Принимает массив
     {
+
         this.firstName = mas[0]; // имя берётся из переданного в метод массива mas с индексом 0
         this.lastName = mas[1]; // фамилия берётся из переданного в метод массива mas с индексом 1
         this.age = Integer.parseInt(mas[2]); // возраст берётся из массива mas с индексом 2 и преобразует в целочисленный тип
@@ -25,49 +27,51 @@ class PersonInformation // класс для хранения вводимых �
 
     }
 
-        public String getFirstName()//геттер для
-        {
-            return this.firstName;
-        }
+    public String getFirstName()//геттер для
+    {
 
-        public void setFirstName(final String firstName)
-        {
-            this.firstName = firstName;
-        }
+        return this.firstName;
+    }
 
-        public String getLastName()
-        {
-            return this.lastName;
-        }
+    public void setFirstName(final String firstName) {
 
-        public void setLastName(final String lastName)
-        {
-            this.lastName = lastName;
-        }
+        this.firstName = firstName;
+    }
 
-        public Integer getAge()
-        {
-            return this.age;
-        }
+    public String getLastName() {
 
-        public void setAge(final Integer age)
-        {
-            this.age = age;
-        }
+        return this.lastName;
+    }
 
-        public String getEmail()
-        {
-            return this.email;
-        }
+    public void setLastName(final String lastName) {
 
-        public void setEmail(final String email)
-        {
-            this.email = email;
-        }
+        this.lastName = lastName;
+    }
+
+    public Integer getAge() {
+
+        return this.age;
+    }
+
+    public void setAge(final Integer age) {
+
+        this.age = age;
+    }
+
+    public String getEmail() {
+
+        return this.email;
+    }
+
+    public void setEmail(final String email) {
+
+        this.email = email;
+    }
 
     @Override //объявление о переопределении метода toString
     public String toString() // метод toString даст нам представление об объекте. Но его надо переопределить для лучшей читаемости
     {
+
         return this.firstName + '\t' + this.lastName + '\t' + this.age + '\t' + this.email; // так нам станет понятен объект
     }
 }
